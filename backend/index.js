@@ -115,15 +115,16 @@ const typeDefs = gql`
       published: Int!
       genres: [String!]!
     ): Book!
+    editAuthor(name:String! setToBorn: Int!):Author
     
   }
 `
 
 const resolvers = {
-  Mutation:{
+  Mutation: {
     addBook: (root, args) => {
-      if(!authors.find(a => a.name.toUpperCase() === args.author.toUpperCase())){
-        authors.push({id: uuid(),name: args.author})
+      if (!authors.find(a => a.name.toUpperCase() === args.author.toUpperCase())) {
+        authors.push({ id: uuid(), name: args.author })
       }
       const newBook = {
         id: uuid(),
@@ -134,6 +135,13 @@ const resolvers = {
       }
       books.push(newBook)
       return newBook
+    },
+    editAuthor: (root, args) => {
+      const author = authors.find(a => a.name === args.name);
+      if (author) {
+        author.born = args.setToBorn
+      }
+      return author
     }
   },
   Query: {
