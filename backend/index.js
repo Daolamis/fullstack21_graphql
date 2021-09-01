@@ -1,4 +1,6 @@
 const { ApolloServer, gql } = require('apollo-server')
+const { v1: uuid } = require('uuid')
+
 const { ApolloServerPluginLandingPageGraphQLPlayground, ApolloServerPluginLandingPageDisabled } = require('apollo-server-core');
 let authors = [
   {
@@ -105,9 +107,35 @@ const typeDefs = gql`
     allBooks(author: String genre: String): [Book!]!
     allAuthors: [Author!]!
   }
+
+  type Mutation {
+    addBook(
+      title: String!
+      author: String!
+      published: Int!
+      genres: [String!]!
+    ): Book!
+    
+  }
 `
 
 const resolvers = {
+  Mutation:{
+    addBook: (root, args) => {
+      if(!authors.find(a => a.name.toUpperCase() === args.author.toUpperCase())){
+        authors.push({id: uuid(),name: args.author})
+      }
+      const newBook = {
+        id: uuid(),
+        title: args.title,
+        author: args.author,
+        published: args.published,
+        genres: args.genres,
+      }
+      books.push(newBook)
+      return newBook
+    }
+  },
   Query: {
     bookCount: () => books.length,
     authorCount: () => authors.length,
