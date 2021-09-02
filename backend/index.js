@@ -5,7 +5,8 @@ const mongoose = require('mongoose')
 const Book = require('./models/book')
 const Author = require('./models/author')
 const { ApolloServerPluginLandingPageGraphQLPlayground,
-  ApolloServerPluginLandingPageDisabled } = require('apollo-server-core')
+  ApolloServerPluginLandingPageDisabled,
+  UserInputError } = require('apollo-server-core')
 
 const MONGODB_URI = process.env.MONGODB_URI
 console.log('connecting to', MONGODB_URI)
@@ -52,13 +53,17 @@ const typeDefs = gql`
 const resolvers = {
   Mutation: {
     addBook: async (root, args) => {
-      let author = await Author.findOne({ name: args.author })
-      if (!author) {
-        author = new Author({ name: args.author })
-        author = await author.save()
+      try {
+        let author = await Author.findOne({ name: args.author })
+        if (!author) {
+          author = new Author({ name: args.author })
+          author = await author.save()
+        }
+        const book = new Book({ ...args, author: author })
+        return await book.save()
+      } catch (error) {
+        throw new UserInputError(error.message, { invalidArgs: args })
       }
-      const book = new Book({ ...args, author: author })
-      return book.save()
     },
     editAuthor: async (root, args) => {
       const author = await Author.findOne({ 'name': args.name })
