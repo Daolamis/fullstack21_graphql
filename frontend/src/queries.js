@@ -16,9 +16,14 @@ query {
     id
     title
     published
-    author
     genres
+    author {
+      id
+      name
+      born
+      bookCount
     }
+  }
 }`
 
 export const ADD_BOOK = gql`
