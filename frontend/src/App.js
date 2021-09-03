@@ -1,24 +1,36 @@
+import { useLazyQuery } from '@apollo/client'
 import React, { useEffect, useRef, useState } from 'react'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import LoginForm from './components/LoginForm'
 import NewBook from './components/NewBook'
 import Notification from './components/Notification'
+import Recommend from './components/Recommend'
+import { ME } from './queries'
 
 const App = () => {
+  const [user, setUser] = useState(null)
   const [page, setPage] = useState('authors')
   const [notification, setNotification] = useState(null)
   const [token, setToken] = useState(null)
   let timeoutRef = useRef()
-  
-  useEffect(()=>{
+  const [getMe, result] = useLazyQuery(ME, { fetchPolicy: "no-cache" })
+
+  useEffect(() => {
     const token = localStorage.getItem('token')
     token && setToken(token)
-  },[])
+  }, [])
 
-  useEffect(()=>{
-    setPage('authors')
-  },[token])
+  useEffect(() => {
+    setPage('authors') //after login go to authors
+    getMe()
+  }, [token]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (result.data) {
+      setUser(result.data.me)
+    }
+  }, [result])
 
   const logout = () => {
     setToken(null)
@@ -39,6 +51,7 @@ const App = () => {
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
         {token && <button onClick={() => setPage('add')}>add book</button>}
+        {token && <button onClick={() => setPage('recommend')}>recommend</button>}
         {!token
           ? <button onClick={() => setPage('login')}>login</button>
           : <button onClick={logout}>logout</button>
@@ -59,6 +72,11 @@ const App = () => {
         setNotification={showNotification}
         show={page === 'add'}
       />
+
+      {user && <Recommend
+        show={page === 'recommend'}
+        genre={user.favoriteGenre}
+      />}
 
       {page === 'login' &&
         <LoginForm setToken={setToken} setNotification={showNotification} />}
