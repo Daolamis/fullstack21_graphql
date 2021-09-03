@@ -14,7 +14,7 @@ const Books = (props) => {
   }
 
   if (result.loading) {
-    <div>Loading ..</div>
+    return <div>Loading ..</div>
   }
 
   const books = showGenre
