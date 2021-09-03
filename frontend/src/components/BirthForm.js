@@ -3,10 +3,14 @@ import React, { useState } from "react"
 import { EDIT_AUTHOR } from "../queries"
 
 
-const BirthForm = ({ authors }) => {
+const BirthForm = ({ authors, setNotification }) => {
   const [born, setBorn] = useState('')
   const [author, setAuthor] = useState('')
-  const [editAuthor] = useMutation(EDIT_AUTHOR)
+  const [editAuthor] = useMutation(EDIT_AUTHOR, {
+    onError: error => {
+      setNotification({message: error.message, isError: true})
+    }
+  })
 
   const handleSubmit = (e) => {
     e.preventDefault()
