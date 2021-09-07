@@ -1,7 +1,5 @@
 require('dotenv').config()
 const { ApolloServer,UserInputError, AuthenticationError, gql } = require('apollo-server')
-const { ApolloServerPluginLandingPageGraphQLPlayground,
-  ApolloServerPluginLandingPageDisabled} = require('apollo-server-core')
 const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
 
@@ -141,11 +139,7 @@ const server = new ApolloServer({
       const currentUser = await User.findById(decodedToken.id)
       return { currentUser }
     }
-  },
-  plugins: [
-    ApolloServerPluginLandingPageGraphQLPlayground({}),
-    ApolloServerPluginLandingPageDisabled()
-  ]
+  }
 })
 
 server.listen().then(({ url }) => {
