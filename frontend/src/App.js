@@ -1,4 +1,4 @@
-import { useLazyQuery } from '@apollo/client'
+import { useLazyQuery, useSubscription } from '@apollo/client'
 import React, { useEffect, useRef, useState } from 'react'
 import Authors from './components/Authors'
 import Books from './components/Books'
@@ -6,7 +6,7 @@ import LoginForm from './components/LoginForm'
 import NewBook from './components/NewBook'
 import Notification from './components/Notification'
 import Recommend from './components/Recommend'
-import { ME } from './queries'
+import { ME, BOOK_ADDED } from './queries'
 
 const App = () => {
   const [user, setUser] = useState(null)
@@ -15,7 +15,11 @@ const App = () => {
   const [token, setToken] = useState(null)
   let timeoutRef = useRef()
   const [getMe, result] = useLazyQuery(ME, { fetchPolicy: "no-cache" })
-
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData: { data: { bookAdded: book } } }) => {
+      showNotification({ message: `${book.title} book by ${book.author.name} was added ` })
+    }
+  })
   useEffect(() => {
     const token = localStorage.getItem('token')
     token && setToken(token)
